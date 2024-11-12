@@ -1,27 +1,30 @@
-name: "Publish"
+name: Docker Build and Push
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main  # Specify the branch that triggers the build
 
 jobs:
-  publish:
-    name: Publish
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - name: Publish
-        uses: home-assistant/builder@master
-        with:
-          args: |
-            --all \
-            --target eufy-security-ws \
-            --docker-hub bropat
-        #env:
-        #  CAS_API_KEY: ${{ secrets.CAS_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build the Docker image
+      - name: Build the Docker image
+        run: docker build --build-arg BUILD_FROM=debian:latest -t your-dockerhub-username/eufy-security-ws:latest .
+
+      # Push the Docker image to Docker Hub
+      - name: Push the Docker image
+        run: docker push your-dockerhub-username/eufy-security-ws:latest
